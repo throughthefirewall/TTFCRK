@@ -12,20 +12,22 @@ Descripción:
 Redes:
     YouTube:    @throughthefirewall
     Twitter:    @FirewallThrough
-    Web:        www.throughthefirewall.com
+    Web:        www.through-the-firewall.com
 """
 
 #Importamos las librerias que usaremos
 import sys
 
+from servicios import *
+
 #Crearemos el mensaje que contiene el modo de uso del programa
 mensaje = """
-Uso:    python ttfcrk.py -h
+Uso:    python ttfcrk.py --help
         python ttfcrk.py -s smtp -e email.email@email.com -d diccionario.txt
         python ttfcrk.py -s ssh -p 22 -u admin -d diccionario
 
     --servicio/-s        ->Servicio sobre el cual realizaremos el ataque de diccionario
-    --help/-h           ->Despliega el menu con el modo de uso del programa
+    --help           ->Despliega el menu con el modo de uso del programa
 
 SMTP:
 
@@ -33,8 +35,9 @@ SMTP:
     --diccionario/-d    ->Diccionario que contiene la posible clave del email
 
 SSH:
+    --host/-h           ->Host al cual se realizará la conexión
     --puerto/-p         ->Puerto del protocolo SSH
-    --usuario/-u           ->Usuario al cual nos conectaremos por medio del protocolo SSH
+    --usuario/-u        ->Usuario al cual nos conectaremos por medio del protocolo SSH
     --diccionario/-d    ->Diccionario que contiene la posible clave del email
 """
 
@@ -42,19 +45,28 @@ def main():
     #Creamos las opciones sobre los servicios que usaremos
     try:
         if(sys.argv[1] == "-s" or sys.argv[1] == "--servicio"):
+            #SMTP
             if(sys.argv[2] == "smtp"):
                 if(sys.argv[3] == "-e" or sys.argv[3] == "--email" and
                         sys.argv[5] == "-d" or sys.argv[5] == "--diccionario"):
-                    print(f"Datos Ingresados: {sys.argv[4]} {sys.argv[6]}")
-            elif(sys.argv[1] == "ssh"):
-                if(sys.argv[3] == "-p" or sys.argv[3] == "--puerto" and
-                        sys.argv[5] == "-u" or sys.argv[5] == "--usuario" and
-                        sys.argv[7] == "-d" or sys.argv[7] == "--diccionario"):
-                    print(f"Datos Ingresados: {sys.argv[4]} {sys.argv[6]} {sys.argv[8]}")
+                    print("[+]Iniciando ataque sobre SMTP...")
+                    servicio_smtp = Servicio_SMTP(sys.argv[4], sys.argv[6])
+                    password = servicio_smtp.ataque_SMTP()
+                    print(f"Email: {sys.argv[4]}\nPassword: {password}")
+            #SSH
+            elif(sys.argv[2] == "ssh"):
+                if(sys.argv[3] == "-h" or sys.argv[3] == "--host" and
+                        sys.argv[5] == "-p" or sys.argv[5] == "--puerto" and
+                        sys.argv[7] == "-d" or sys.argv[7] == "--usuario" and
+                        sys.argv[9] == "-d" or sys.argv[9] == "--diccionario"):
+                    print("[+]Iniciando ataque sobre SSH")
+                    servicio_ssh = Servicio_SSH(sys.argv[4], int(sys.argv[6]), sys.argv[8], sys.argv[10])
+                    password = servicio_ssh.ataque_SSH()
+                    print(f"Host: {sys.argv[4]}\nPuerto: {sys.argv[6]}\nUsername: {sys.argv[8]}\nPassword: {password}")
             else:
                 print(mensaje)
                 exit()
-        elif(sys.argv[1] == "--help" or sys.argv[1] == "-h"):
+        elif(sys.argv[1] == "--help"):
             print(mensaje)
             exit()
         else:
