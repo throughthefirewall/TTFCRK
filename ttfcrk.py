@@ -19,26 +19,35 @@ Redes:
 import sys
 
 from servicios import *
+from generador import *
 
 #Crearemos el mensaje que contiene el modo de uso del programa
 mensaje = """
 Uso:    python ttfcrk.py --help
-        python ttfcrk.py -s smtp -e email.email@email.com -d diccionario.txt
-        python ttfcrk.py -s ssh -p 22 -u admin -d diccionario
 
-    --servicio/-s        ->Servicio sobre el cual realizaremos el ataque de diccionario
-    --help           ->Despliega el menu con el modo de uso del programa
+    --servicio/-s       ->Servicio sobre el cual realizaremos el ataque de diccionario
+    --help              ->Despliega el menu con el modo de uso del programa
+
+DICCIONARIO:
+    --archivo/-a         ->Nombre del diccionario a generar
+    --palabras/-p       ->Palabras a agregar en el diccionario
+
+    python ttfcrk.py --archivo [ARCHIVO.TXT] --palabras [PALABRAS]
 
 SMTP:
 
     --email/-e          ->Email de la cuenta a la cual realizaremos el ataque de diccionario
     --diccionario/-d    ->Diccionario que contiene la posible clave del email
 
+    python ttfcrk.py --servicio smtp -e [EMAIL] -d [DICCIONARIO] 
+
 SSH:
     --host/-h           ->Host al cual se realizará la conexión
     --puerto/-p         ->Puerto del protocolo SSH
     --usuario/-u        ->Usuario al cual nos conectaremos por medio del protocolo SSH
     --diccionario/-d    ->Diccionario que contiene la posible clave del email
+
+    python ttfcrk.py --servicio ssh -h [HOST] -p [PUERTO] -u [USUARIO] -d [DICCIONARIO]
 """
 
 def main():
@@ -66,6 +75,19 @@ def main():
             else:
                 print(mensaje)
                 exit()
+        #Creamos el diccionario
+        elif(sys.argv[1] == "-a" or sys.argv[1] == "--archivo" and
+                sys.argv[3] == "-p" or sys.argv[3] == "--palabras"):
+            lista = []
+            for i in range(4, len(sys.argv)):
+                lista.append(sys.argv[i])
+
+            nombre_diccionario = str(sys.argv[2])
+            longitud_lista = len(lista)
+
+            resultado = crear_diccionario(nombre_diccionario, longitud_lista, lista)
+            print(resultado)
+
         elif(sys.argv[1] == "--help"):
             print(mensaje)
             exit()
@@ -80,7 +102,7 @@ def main():
 if __name__ == "__main__":
     #Si los parametros asignados por el usuario son menores a 2, cerramos el programa
     if(len(sys.argv) < 2):
-        pass
+        print(mensaje)
         exit()
     main()
 
